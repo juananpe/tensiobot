@@ -1,0 +1,11 @@
+php -v = 7.2.34
+brew use php@7.2
+sudo pecl install yaml-2.0.0
+php -i  | grep php.ini
+vi /usr/local/etc/php/7.2/php.ini
+
+echo 'export PATH="/usr/local/opt/php@7.3/sbin:$PATH"' >> $HOME/.bash_profile
+
+source  $HOME/.bash_profile
+
+

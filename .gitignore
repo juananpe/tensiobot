@@ -1,0 +1,15 @@
+vendor/
+.DS_Store
+*.swp
+composer.phar
+composer.lock
+Commands/UserCommands/imgs/
+Files/*
+config.php
+config.yml
+.Rhistory
+OpcionesCommand.*
+tips.txt
+tips_admin/tips_admin/settings.py
+*.pyc
+.Rapp.history
