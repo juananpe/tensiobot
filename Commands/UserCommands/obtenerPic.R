@@ -67,14 +67,14 @@ generarPic <- function() {
    if (nrow(yt)<4) {
 	  picture <- ggplot(yt, aes(x=no, y=valor, colour=clave, group=1)) + 
     	   theme(axis.text.x = element_blank(), axis.title.x = element_blank()) + 
-          annotate("text", x =1 , y = 150, label = wrapper( "No hay suficientes datos disponibles. Debes tomarte la tensión al menos un par de veces para poder generar una gráfica correcta.", width = 50) , size=4)
+          annotate("text", x =1 , y = 150, label = wrapper( "Ez daude nahiko datu grafika marrazteko. Mesedez, sartu beste bi tensio balio grafika zuzena sortu ahal izateko.", width = 50) , size=4)
    }else{ 
 
   picture <- ggplot(yt, aes(x=datecreated, y=valor, colour=clave)) + geom_line() + 
 	  geom_point(size=3) +
     # xlab("Medici\U00F3n") + ylab("Tensi\U00F3n") +
-    xlab("Measurement") + ylab("Blood Pressure") +
-    scale_colour_manual("Legend", labels=c('high','low'), values=c('#F8766D','#7CAE00')) +
+    xlab("Measurement") + ylab("Tentsioaren balioa") +
+    scale_colour_manual("Legenda", labels=c('altua','baxua'), values=c('#F8766D','#7CAE00')) +
     theme(axis.text.x = element_text(angle=90)) + 
     scale_x_datetime(labels = date_format("%Y-%m-%d %H:%m"), 
 		     breaks = yt$datecreate , 
