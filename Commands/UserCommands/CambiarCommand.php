@@ -179,9 +179,10 @@ class CambiarCommand extends UserCommand
 			$this->conversation->update();
 			$text = '';
 			goto state2;
-		}else if (trim(strtolower($text)) == trim(strtolower($mensajes['yes']))){
+		}else if (trim(strtolower($text)) == trim(strtolower($mensajes['no']))){
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
 			$text          = '';
+			goto state2;
 		} 
             // no break
             case 1:  // cambiar primera hora
