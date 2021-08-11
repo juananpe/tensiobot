@@ -138,7 +138,7 @@ class ApptCommand extends UserCommand
 
 		    if ($cita != '') {
 			    $data['text'] = $this->filter($mensajes['citacambiar'], $cita);
-			    $opciones = ['Yes', 'No', 'Cancel date'];
+			    $opciones = [$mensajes['yes'], $mensajes['no'], $mensajes['canceldate']];
 		    } else {
 			    $data['text'] = $mensajes['citaningunadefinida'];
 			    $opciones = ['Yes', 'No'];
@@ -156,13 +156,15 @@ class ApptCommand extends UserCommand
 		}
 
 
-		if (strpos(strtolower($text), "cancel")!==false){
+		if (strpos(
+			strtolower(explode(' ', $text)[0]), 
+			strtolower(explode(' ', $mensajes['canceldate'])[0])) !== false){
 			$this->anularCita($user_id);
 			$data['text'] = $mensajes['citaanulada'];
 			$result = Request::sendMessage($data);
 	                $this->conversation->stop();
 			break;
-		}else if (strpos(strtolower($text), "y")!==false){
+		}else if (strpos(strtolower($text), strtolower($mensajes['yes']))!==false){
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
 			$text          = '';
 	                $notes['state'] = 1;
@@ -174,6 +176,8 @@ class ApptCommand extends UserCommand
 			else
 				$data['text'] = $mensajes['citadeacuerdo'];
 
+			$data['reply_markup'] = Keyboard::remove(['selective' => true, 'oneTime' => true, 'resize' => true]);
+			
 			$result = Request::sendMessage($data);
 	                $this->conversation->stop();
 			break;
@@ -224,7 +228,7 @@ class ApptCommand extends UserCommand
 		    'text'    => $mensajes['citacorrecta'],
 		];
 
-		$data['reply_markup'] = (new Keyboard(['/Check ❤️', '/Video 📺', '/Chart 📈', '/Appt 📅']))
+			$data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
 				->setResizeKeyboard(true)
 				->setOneTimeKeyboard(false)
 				->setSelective(true);

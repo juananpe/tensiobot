@@ -31,22 +31,50 @@ class GenericCommand extends SystemCommand
      */
     public function execute()
     {
-        $message = $this->getMessage();
+	    $message = $this->getMessage();
 
-        //You can use $command as param
-        $chat_id = $message->getChat()->getId();
-        $user_id = $message->getFrom()->getId();
-        $command = $message->getCommand();
+	    //You can use $command as param
+	    $chat_id = $message->getChat()->getId();
+	    $user_id = $message->getFrom()->getId();
+	    $command = $message->getCommand();
+	    $user = $message->getFrom();
 
-        if (in_array($user_id, $this->telegram->getAdminList()) && strtolower(substr($command, 0, 5)) == 'whois') {
-            return $this->telegram->executeCommand('whois', $this->update);
-        }
+	    require("db.php");
+	    require("l10n.php");
 
-        $data = [
-            'chat_id' => $chat_id,
-            'text'    => 'Comando /' . $command . ' no encontrado... :(',
-        ];
 
-        return Request::sendMessage($data);
+
+	    if (in_array($user_id, $this->telegram->getAdminList()) && strtolower(substr($command, 0, 5)) == 'whois') {
+		    return $this->telegram->executeCommand('help', $this->update);
+	    }
+
+
+	    if  (strtolower($command) == strtolower(substr($mensajes['tension'],1))) {
+		    return $this->telegram->executeCommand('check', $this->update);
+	    }
+	    if  (strtolower($command) == strtolower(substr($mensajes['video'],1))) {
+		    return $this->telegram->executeCommand('video', $this->update);
+	    }
+	    if  (strtolower($command) == strtolower(substr($mensajes['historial'],1))) {
+		    return $this->telegram->executeCommand('chart', $this->update);
+	    }
+	    if  (strtolower($command) == strtolower(substr($mensajes['cita'],1))) {
+		    return $this->telegram->executeCommand('appt', $this->update);
+	    }
+	    if  (strtolower($command) == strtolower(substr($mensajes['cambiar'],1))) {
+		    return $this->telegram->executeCommand('cambiar', $this->update);
+	    }
+
+
+
+
+
+
+	    $data = [
+		    'chat_id' => $chat_id,
+		    'text'    => 'Comando /' . $command . ' no encontrado... :(',
+	    ];
+
+	    return Request::sendMessage($data);
     }
 }

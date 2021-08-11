@@ -130,6 +130,8 @@ class CambiarCommand extends UserCommand
         $result = Request::emptyResponse();
 	
 	require("db.php");
+	require("l10n.php");
+
 	list($alerta1, $alerta2) = $this->obtenerAlertas($user_id);
 
 	// error_log(__file__ . PHP_EOL . $alerta1 . " State:" . $state . " Text: " . $text, 3, "/tmp/error.log");
@@ -144,11 +146,11 @@ class CambiarCommand extends UserCommand
                     $this->conversation->update();
 
 		    if ($this->isAlertaDesactivada(1, $user_id)){
-			    $data['text'] = 'La primera alerta está desactivada. ¿Quieres activarla?';
-			    $opciones = ['Sí', 'No'];
+			    $data['text'] = $mensajes['primeradesactivada'] . $mensajes['quieresactivarla'];
+			    $opciones = [$mensajes['yes'], $mensajes['no']];
 		    }else{
-	                    $data['text']         = 'La primera alerta es a las: ' . $alerta1 . '. ¿Quieres cambiarla?';
-			    $opciones = ['Sí', 'No', 'Desactivar esta alerta'];
+	                    $data['text']         = $mensajes['primeraalas'] . $alerta1 . $mensajes['quierescambiarla'];
+			    $opciones = [$mensajes['yes'], $mensajes['no'], $mensajes['disablealert']];
 		    }
 		    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
 
@@ -161,10 +163,10 @@ class CambiarCommand extends UserCommand
                     break;
 		}
 
-		if (strpos(strtolower($text), "desactivar")!==false){
-
+		if (trim(strtolower($text))==trim(strtolower($mensajes['disablealert']))){
+			// change to year 2222 :)
 			$this->cambiarAlerta($alerta1, 1, $user_id, 2222);
-			$data['text'] = "De acuerdo, alerta desactivada.";
+			$data['text'] = $mensajes['deacuerdoalerta'];
 			$result = Request::sendMessage($data);
 
 			Request::sendChatAction([
@@ -177,7 +179,7 @@ class CambiarCommand extends UserCommand
 			$this->conversation->update();
 			$text = '';
 			goto state2;
-		}else if (strpos(strtolower($text), "s")!==false){
+		}else if (trim(strtolower($text)) == trim(strtolower($mensajes['yes']))){
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
 			$text          = '';
 		} 
@@ -188,9 +190,9 @@ class CambiarCommand extends UserCommand
                     $this->conversation->update();
 
 		    if ($text === '')
-                         $data['text'] = 'De acuerdo, indica la hora, en formato HH:MM. Por ejemplo, 13:15';
+                         $data['text'] = $mensajes['deacuerdoindicahora'];
 		    elseif(strpos($text, "No")===false)
-		         $data['text'] = 'Vaya, parece que la hora introducida no es correcta. Recuerda que la hora debe estar comprendida entre 0 y 23. Los minutos entre 0 y 59. Por favor, indica la hora en formato HH:MM.';
+		         $data['text'] = $mensajes['vayahoraincorrecta'];
 
 		    if (strpos($text, "No")===false){
 		    	$data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
@@ -200,7 +202,7 @@ class CambiarCommand extends UserCommand
 		} elseif (isset($trozos) && (!$this->inrange($trozos[1], "h") || !$this->inrange($trozos[2], "m")) ){
 
 			// error_log(__file__ . PHP_EOL . print_r($trozos, 1) . " inrange: " . $this->inrange($trozos[1], "h"), 3, "/tmp/error.log");
-			$data['text'] = 'La hora introducida no es correcta. Recuerda que la hora debe estar comprendida entre 0 y 23. Los minutos entre 0 y 59. Por favor, indica la hora en formato HH:MM.';
+			$data['text'] = $mensajes['vayahoraincorrecta'];
 			$result = Request::sendMessage($data);
 			break;	
 		}	
@@ -208,7 +210,7 @@ class CambiarCommand extends UserCommand
 		if (strpos($text, "No")===false){
 			$this->cambiarAlerta($trozos[1] . ":" . $trozos[2], 1, $user_id);
 			$notes['hora1'] = $text;
-			$data['text'] = "OK, ¡cambiada!";
+			$data['text'] = $mensajes['okcambiada'];
 			$result = Request::sendMessage($data);
 
 		}
@@ -221,11 +223,12 @@ class CambiarCommand extends UserCommand
                     $this->conversation->update();
 
 		    if ($this->isAlertaDesactivada(2, $user_id)){
-			    $data['text'] = 'La segunda alerta está desactivada. ¿Quieres activarla?';
-			    $opciones = ['Sí', 'No'];
+			    $data['text'] = $mensajes['oksegundadesactivada'] . $mensajes['quieresactivarla'];
+			    $opciones = [$mensajes['yes'], $mensajes['no']];
+
 		    } else { 
-			    $data['text']         = 'La segunda alerta es a las: ' . $alerta2 . '. ¿Quieres cambiarla?';
-			    $opciones = ['Sí', 'No', 'Desactivar esta alerta'];
+			    $data['text']         = $mensajes['segundaalertaalas'] . $alerta2 . $mensajes['quierescambiarla'];
+			    $opciones = [$mensajes['yes'], $mensajes['no'], $mensajes['disablealert']];
 		    }
 
                     // $data['reply_markup'] = Keyboard::remove(['selective' => true]);
@@ -240,11 +243,10 @@ class CambiarCommand extends UserCommand
 
 		   }
 
-
-		if (strpos(strtolower($text), "desactivar")!==false){
-
+		if (trim(strtolower($text))==trim(strtolower($mensajes['disablealert']))){
+		    
 			$this->cambiarAlerta($alerta2, 2, $user_id, 2222);
-			$data['text'] = "De acuerdo, alerta desactivada.";
+			$data['text'] = $mensajes['deacuerdoalerta'];
 			$result = Request::sendMessage($data);
 
 			Request::sendChatAction([
@@ -257,10 +259,10 @@ class CambiarCommand extends UserCommand
 			goto state6;
 			$text = '';
 			break;
-		}
 
 
-		if (strpos(strtolower($text), "s")!==false){
+		}else if (trim(strtolower($text)) == trim(strtolower($mensajes['yes']))){
+
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
 			$text          = '';
 		} 
@@ -273,23 +275,26 @@ class CambiarCommand extends UserCommand
                     $this->conversation->update();
 
 		    if ($text === '')
-                    $data['text'] = 'De acuerdo, indica la hora, en formato HH:MM. Por ejemplo, 20:30.';
-		    elseif(strpos($text, "No")===false)
-		    $data['text'] = 'Vaya, parece que la hora introducida no es correcta. Recuerda que la hora debe estar comprendida entre 0 y 23. Los minutos entre 0 y 59. Por favor, indica la hora en formato HH:MM.';
+			    $data['text'] = $mensajes['deacuerdoindicahora'];
+		    // elseif(strpos($text, "No")===false)
+		    elseif (trim(strtolower($text)) != trim(strtolower($mensajes['no'])))
+			    $data['text'] = $mensajes['vayahoraincorrecta'];
 
-		    if (strpos($text, "No")===false){
+			    // if (strpos($text, "No")===false){
+		    if (trim(strtolower($text)) != trim(strtolower($mensajes['no']))){
 		       $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
                        $result = Request::sendMessage($data);
 		       break;
 		    }
 		} elseif (isset($trozos) && (!$this->inrange($trozos[1], "h") || !$this->inrange($trozos[2], "m")) ){
 			// error_log(__file__ . PHP_EOL . print_r($trozos, 1) . " inrange: " . $this->inrange($trozos[2], "m"), 3, "/tmp/error.log");
-			$data['text'] = 'La hora introducida no es correcta. Recuerda que la hora debe estar comprendida entre 0 y 23. Los minutos entre 0 y 59. Por favor, indica la hora en formato HH:MM.';
+			$data['text'] = $mensajes['vayahoraincorrecta'];
 			$result = Request::sendMessage($data);
 			break;	
 		}	
 		
-		if (strpos($text, "No")===false){
+		// if (strpos($text, "No")===false){
+		    if (trim(strtolower($text)) != trim(strtolower($mensajes['no']))){
 			$this->cambiarAlerta($trozos[1] . ":" . $trozos[2], 2, $user_id);
 			$notes['hora2'] = $text;
 		}
@@ -298,24 +303,24 @@ class CambiarCommand extends UserCommand
             case 6:
 		state6:
                 $this->conversation->update();
-                $out_text = 'Muy bien. Los datos han sido actualizados correctamente.' . PHP_EOL;
+                $out_text = $mensajes['enteredcorrectly'] . PHP_EOL;
                 unset($notes['state']);
 
 
 		list($alerta1, $alerta2) = $this->obtenerAlertas($user_id);
 		//  $out_text .= PHP_EOL . "Media de sistólicas:" . $mediasistolica;
 		if ( $this->isAlertaDesactivada(1, $user_id) ) {
-			$out_text .= PHP_EOL . "La primera alerta está desactivada. "; 
+			$out_text .= PHP_EOL . $mensajes['primeradesactivada'];
 		} else{
-			$out_text .= PHP_EOL . "La primera alerta será a las: " . $alerta1;
+			$out_text .= PHP_EOL . $mensajes['primeraalas'] . $alerta1;
 		}
 
 		if ( $this->isAlertaDesactivada(2, $user_id) ) {
-			$out_text .= PHP_EOL . "La segunda alerta está desactivada. ";
+			$out_text .= PHP_EOL . $mensajes['oksegundadesactivada'];
 
 		} else {
 
-			$out_text .= PHP_EOL . "La segunda alerta será a las: " . $alerta2;
+			$out_text .= PHP_EOL . $mensajes['segundaalertaalas'] . $alerta2;
 		}
 
        //         $data['reply_markup'] = Keyboard::remove(['selective' => true]);

@@ -1,5 +1,7 @@
 php -v = 7.2.34
 brew use php@7.2
+
+(you might need to uninstall it first, using "pecl uninstall")
 sudo pecl install yaml-2.0.0
 php -i  | grep php.ini
 vi /usr/local/etc/php/7.2/php.ini
@@ -7,5 +9,22 @@ vi /usr/local/etc/php/7.2/php.ini
 echo 'export PATH="/usr/local/opt/php@7.3/sbin:$PATH"' >> $HOME/.bash_profile
 
 source  $HOME/.bash_profile
+
+====
+
+
+php 8.x
+
+ sudo pecl install yaml
+
+Build process completed successfully
+Installing '/usr/local/Cellar/php/8.0.8/pecl/20200930/yaml.so'
+install ok: channel://pecl.php.net/yaml-2.2.1
+configuration option "php_ini" is not set to php.ini location
+You should add "extension=yaml.so" to php.ini
+
+
+php -m|grep yaml
+yaml
 
 

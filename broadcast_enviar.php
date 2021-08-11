@@ -38,19 +38,23 @@ select t.valor as username, a.user_id, hora1, hora2, iniciar, finalizar
 			AND a.user_id = t.user_id and t.clave = 'username'
 					");
 
-$texts = $conn->query("select * from texts where id = 1");
-$message = $texts->fetch()['frase'];
+// $texts = $conn->query("select * from texts where id = 1");
+// $message = $texts->fetch()['frase'];
+
 
 foreach($users as $user) {
+
+	require("l10n.php");
+
 	$chat_id =  $user['user_id'] ;
 
-	if ($chat_id !== '' && $message !== '') {
 	    $data = [
 		'chat_id' => $chat_id,
-		'text'    => filter($message, $user),
+		'text'    => filter($mensajes['holasonlas'], $user),
 	    ];
 
-	    $data['reply_markup'] = (new Keyboard(['/Tension', '/Video', '/Historial', '/Cita']))
+	    $data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
+		// $data['reply_markup'] = (new Keyboard(['/Tension', '/Video', '/Historial', '/Cita']))
 		->setResizeKeyboard(true)
 		->setOneTimeKeyboard(true)
 		->setSelective(true);
@@ -58,9 +62,7 @@ foreach($users as $user) {
 
 	    $result = Request::sendMessage($data);
 
-
-
-
+/*
 	    $tipselect =  "SELECT tip FROM tips ORDER BY RAND() LIMIT 1";
 	    $tipresult = $conn->query($tipselect);
 	    $data['text'] = "Recuerda: " . $tipresult->fetch()[0];
@@ -71,7 +73,7 @@ foreach($users as $user) {
 			]);
 	    sleep(3);
 	    $result = Request::sendMessage($data);
-
+ */
 
 	    // $result = Request::emptyResponse();
 
@@ -85,7 +87,6 @@ foreach($users as $user) {
 	    } else {
 		echo 'Sorry message not sent to: ' . $chat_id;
 	    }
-	}
 }
 
 print_r("Enviados: $enviados \n");

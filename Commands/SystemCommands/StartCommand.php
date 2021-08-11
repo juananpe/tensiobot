@@ -92,46 +92,78 @@ class StartCommand extends SystemCommand
         $result = Request::emptyResponse();
 
 	require("db.php");
+
+	$mensajes = [];
 	require("l10n.php");
 
 	//State machine
         //Entrypoint of the machine state if given by the track
         //Every time a step is achieved the track is updated
         switch ($state) {
-            case 0:
-                if ($text === '') {
-                    $notes['state'] = 1; 
-                    $this->conversation->update();
+	case 0:
+		if ($text === '') {
+			$notes['state'] = 1; 
+			$this->conversation->update();
 
 
 			$query = "replace into alertas set user_id = " . $this->getMessage()->getFrom()->getId() . 
 ", hora1= concat(date(now()), ' ', '10:00:00') , hora2=  concat(date(now()), ' ', '21:00:00') ";
-				// ", iniciar= date(now()) , finalizar = date( date_add( NOW(), INTERVAL 7 DAY) )";
+			// ", iniciar= date(now()) , finalizar = date( date_add( NOW(), INTERVAL 7 DAY) )";
 
 			$stmt =  $conn->query($query);
 
-		    $text = 'Hi! I\'m @' . $BOT_NAME . '. Your personal assistant to help you check your blood pressure. Before starting, could you please tell me what the password is?';
+			$opciones = ['es', 'eu', 'en'];
+			$data['text'] =  $mensajes['helloiam'];
+			$data['chat_id'] = $chat_id;
 
-		        $data['text'] = $text;
-		        $data['chat_id'] = $chat_id;
+			$data['reply_markup'] = (new Keyboard($opciones))
+				->setResizeKeyboard(true)
+				->setOneTimeKeyboard(true)
+				->setSelective(true);
+
 
 			$result = Request::sendMessage($data);
 			break;
 		}
-	    case 1:
-		    if (strtolower($text) != strtolower($CLAVE)){
-			 $data['text'] = "Incorrect password. Please, try again.";
+	case 1:
+		    if ( !in_array($text, ['es','en','eu'] )){
+			 $data['text'] = $mensajes['changelanguage'];
 		         $data['chat_id'] = $chat_id;
 			 $result = Request::sendMessage($data);
 			 break;
 		    }	    
-		       $text = '';
+				// override user's language code in Telegram
+	    	    $user->language_code = $text;
+		
+			// obtener id de lang actual, si existe
+			$query = "select id from tensiones where user_id = " . $this->getMessage()->getFrom()->getId(). " and clave = 'lang'";
+			$rs = $conn->query($query);
+			$extra = "";
+			if ($rs->rowCount() > 0){
+				list($id) = $rs->fetch();
+				$extra = ", id = " . $id;
+			}
+
+			// cambiar lang 
+			$query = "replace into tensiones set valor='". $text .
+					"', user_id = " . $this->getMessage()->getFrom()->getId() . 
+					", clave='lang'" . $extra;
+			$stmt =  $conn->query($query);
+			// reload messages in new language
+			$mensajes = [];
+			require("l10n.php");
+
+
+		    $text = '';
+
 		    // no break
 	    case 2:
 		    if ($text === ''){
 			  $notes['state'] = 2; 
 			  $this->conversation->update();
-			  $data['text'] = "Right! From now on I will help you check your blood pressure, but first I need to know your name, so please, could you tell me your name?";
+
+			  // lang correct. ask for user's name	
+			  $data['text'] = $mensajes['correctpass'];
 			  $result = Request::sendMessage($data);
 			  break;
 		    }
@@ -157,9 +189,9 @@ class StartCommand extends SystemCommand
 		  $text = '';
 
 	    case 3:
-		    	    if ($text === '' || !in_array(substr(strtolower($text),0,1), ['y','n'])) {
-				$data['text'] = $mensajes['citatehandado'];
-				$data['reply_markup'] = (new Keyboard(['Yes', 'No']))
+		    	    if ($text === '' || !in_array(substr(strtolower($text),0,1), ['y','n','b','e','s'])) {
+				$data['text'] = "👍 " . $mensajes['citatehandado'];
+				$data['reply_markup'] = (new Keyboard([$mensajes['yes'], $mensajes['no']]))
 				->setResizeKeyboard(true)
 				->setOneTimeKeyboard(true)
 				->setSelective(true);
@@ -171,7 +203,7 @@ class StartCommand extends SystemCommand
 		    } 
 
 		    $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
-		    if (strtolower($text) == 'no'){
+		    if (strtolower($text) == strtolower($mensajes['no'])){
 			    $mensajes['citacorrecta'] = $mensajes['citanohaycita'];
 			    goto nohaycita;
 		    }
@@ -231,7 +263,8 @@ case 4:
 		    'text'    => $mensajes['citacorrecta'],
 		];
 
-		$data['reply_markup'] = (new Keyboard(['/Tension', '/Video', '/Historial', '/Cita']))
+		$data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
+//		$data['reply_markup'] = (new Keyboard([$mensajes['tension'], $mensajes['video'], $mensajes['historial'], $mensajes['cita']]))
 				->setResizeKeyboard(true)
 				->setOneTimeKeyboard(false)
 				->setSelective(true);

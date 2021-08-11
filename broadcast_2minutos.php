@@ -10,7 +10,6 @@ use Longman\TelegramBot\Telegram;
 
 require("db.php");
 
-require("l10n.php");
 
 $telegram = new Telegram($API_KEY, $BOT_NAME);
 
@@ -29,6 +28,8 @@ select t.id, t.user_id, t.clave, t.valor, a.finalizar, t.notes
 
 
 foreach($users as $user) {
+	require("l10n.php");
+	
 	$chat_id =  $user['user_id'] ;
 
 	$message = $mensajes['yahanpasado2minutos'];

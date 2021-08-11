@@ -148,7 +148,7 @@ class CheckCommand extends UserCommand
 		    $data['text']         = $this->filter($mensajes['recuerdaquelatoma']);
 			    // 'OK, recuerda que la toma de tensión debe hacerse antes de la comida (o 1h después) y antes de la cena (o 1h después). Son las '. date('H:i') . '. ¿Seguro que quieres tomarte ahora la tensión?';
 
-		    $data['reply_markup'] = (new Keyboard(['Yes, now', 'No, I prefer to wait']))
+		    $data['reply_markup'] = (new Keyboard([$mensajes['yesnow'],  $mensajes['nowait']]))
                         ->setResizeKeyboard(true)
                         ->setOneTimeKeyboard(true)
                         ->setSelective(true);
@@ -164,8 +164,11 @@ class CheckCommand extends UserCommand
 				->setResizeKeyboard(true)
 				->setOneTimeKeyboard(true)
 				->setSelective(true);
-			
-			$data['text']      = "OK! We'll wait. Remember that you only have to press /check to reactivate me :)";
+
+			// $user->language_code='eu';	
+			$data['text']      =  $mensajes['okesperare'];
+			// $user->getLanguageCode(); $mensajes['okesperare'];
+			// print_r($user);
 			$this->conversation->stop();
 			$result = Request::sendMessage($data);
 			break;
@@ -184,7 +187,7 @@ class CheckCommand extends UserCommand
                     $this->conversation->update();
 
 		    if ($text === '')
-                    $data['text'] = 'OK, check your pressure. When you finish, tell me what the maximum has been:';
+                    $data['text'] =  $mensajes['okcheckyourpressure'];
 		    else
 				$data['text'] =  $mensajes['latensiondebesernumero'];
 			    //'Disculpa. No entiendo. Tu tensión arterial debe ser un número. Tecléalo de nuevo, por favor.';
@@ -219,7 +222,7 @@ class CheckCommand extends UserCommand
                     $notes['state'] = 2;
                     $this->conversation->update();
 
-                    $data['text'] = 'Very well. Tell me what the minimum has been:';
+                    $data['text'] = $mensajes['verywellminimum'];
                     if ($text !== '') {
                         $data['text'] =  $mensajes['latensiondebesernumero'];
 			//  'Disculpa. No entiendo. La tensión arterial tebe ser un número. Tecléalo de nuevo, por favor:';
@@ -246,21 +249,22 @@ class CheckCommand extends UserCommand
 
 		// comprobar si ha metido los datos al revés
 		if ($notes['diastolica' . $notes['toma']] > $notes['sistolica' . $notes['toma']]){
-			$data['text'] = 'I think you have entered the data backwards. Don\'t worry, I saved them correctly :)';
+			$data['text'] = $mensajes['backwards'];
 			$result = Request::sendMessage($data);
 			$auxiliar = $notes['diastolica'. $notes['toma']];
 			$notes['diastolica' . $notes['toma']] = $notes['sistolica' . $notes['toma']];
 			$notes['sistolica' . $notes['toma']] = $auxiliar;
 		}
 
-		$data['text'] =  "I saved the following data. High: " . $notes['sistolica'.$notes['toma']]. " Low: " . $notes['diastolica'.$notes['toma']];
+		$data['text'] =  $mensajes['guardadoalta'] . $notes['sistolica'.$notes['toma']]. $mensajes['guardadobaja'] . $notes['diastolica'.$notes['toma']];
 		$result = Request::sendMessage($data);
 
 
 
             // no break
-            case 3:
-                if ($text === '' || !in_array($text, [$mensajes['okyahevuelto']], true)) {
+	    case 3:
+
+                if ($text === '' || !in_array($text, [trim($mensajes['okyahevuelto'])])) {
                     $notes['state'] = 3;
                     $this->conversation->update();
 
@@ -272,9 +276,7 @@ class CheckCommand extends UserCommand
 
 		    // $prefix = ($notes['toma'] <= 2)?'OK. ': '';
 
-		    $data['text'] = 'To confirm that the blood pressure is stable, you must wait 2 minutes and take it again. I\'ve already started timing ⏰' . 
-			    '
-Don\'t worry. I\'ll let you know. Be patient ... 😌';
+		    $data['text'] = $mensajes['confirmstable'] .  ' ' . $mensajes['tranquilo'];
 
 		    $this->guardarDatos("alerta", date("Y-m-d H:i:s"), $user_id);
 
@@ -301,7 +303,7 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
                     $this->conversation->update();
 
 		    if ($text === '')
-                    $data['text'] = 'Well, what has been the highest blood pressure now?:';
+			    $data['text'] = $mensajes['highestblood'];
 		    else
 		    $data['text'] = $mensajes['latensiondebesernumero'];
 
@@ -337,7 +339,7 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
                     $this->conversation->update();
 
 		    if ($text === '')
-                    $data['text'] = 'And what has been the lowest?:';
+                    $data['text'] = $mensajes['lowestblood'];
 		    else
 		    $data['text'] = $mensajes['latensiondebesernumero'];
 
@@ -361,7 +363,7 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
 
 	// comprobar si ha metido los datos al revés
 		if ($notes['diastolica' . $notes['toma']] > $notes['sistolica'. $notes['toma']]){
-			$data['text'] = 'I think you have entered the data backwards. Don\'t worry, I have saved them correctly :)';
+			$data['text'] = $mensajes['backwards'];
 			$result = Request::sendMessage($data);
 			$auxiliar = $notes['diastolica' . $notes['toma']];
 			$notes['diastolica' . $notes['toma']] = $notes['sistolica' . $notes['toma']];
@@ -375,7 +377,8 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
 		// error_log(  abs($notes['diastolica' . $notes['toma']] - $notes['diastolica' . ($notes['toma']-1) ] ) . PHP_EOL, 3, "/tmp/error.log");
 
 
-		$suffix =  " and they seem to show a stable blood pressure";
+		$suffix =  $mensajes['andtheyseemtoshow'];
+		// " and they seem to show a stable bddddlood pressure";
 		if ( abs($notes['sistolica' . $notes['toma']] - $notes['sistolica'    . ($notes['toma']-1) ] ) > 5  || 
 			abs($notes['diastolica' . $notes['toma']] - $notes['diastolica' . ($notes['toma']-1) ] ) > 5 )
 		{
@@ -383,7 +386,7 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
 			error_log( $notes['toma'] . ":" . $MAX_TOMAS, 3, "/tmp/error.log");
 
 		        if ( $notes['toma'] < $MAX_TOMAS  ){
-				$data['text'] = "The difference between measurements is more than 5 points. You must check your blood pressure one more time";
+				$data['text'] = $mensajes['differencebetween'];
 				$result = Request::sendMessage($data);
 
 				Request::sendChatAction([
@@ -404,14 +407,14 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
             case 6:
 
                 $this->conversation->update();
-                $out_text = 'Very well. The data has been entered correctly' . $suffix . '. The results have been:' . PHP_EOL;
+                $out_text = $mensajes['enteredcorrectly'] . $suffix . $mensajes['theresultshavebeen'] . PHP_EOL;
                 unset($notes['state']);
 
 		$mediasistolica = ((int)$notes['sistolica' . $notes['toma']] + (int)$notes['sistolica' . ($notes['toma']-1)]) / 2;
 		$mediadiastolica = ((int)$notes['diastolica' . $notes['toma']] + (int)$notes['diastolica' . ($notes['toma']-1)]) / 2;
 
-		$out_text .= PHP_EOL . "Mean blood pressure (high): " . $mediasistolica;
-		$out_text .= PHP_EOL . "Mean blood pressure (low): " . $mediadiastolica; 
+		$out_text .= PHP_EOL . $mensajes['meanbloodpressurehigh'] . $mediasistolica;
+		$out_text .= PHP_EOL . $mensajes['meanbloodpressurelow'] . $mediadiastolica; 
 
 		$this->guardarDatos("ta", $mediasistolica, $user_id);
 		$this->guardarDatos("tb", $mediadiastolica, $user_id);
@@ -447,7 +450,7 @@ Don\'t worry. I\'ll let you know. Be patient ... 😌';
 		// "\nTambién puedes ver tu historial o ver un vídeo explicativo pulsando en los botones que verás aquí abajo 👇";
 	
 	
-			$data['reply_markup'] = (new Keyboard(['/Check ❤️', '/Video 📺', '/Chart 📈', '/Appt 📅']))
+			$data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
                         ->setResizeKeyboard(true)
                         ->setOneTimeKeyboard(false)
                         ->setSelective(true);
