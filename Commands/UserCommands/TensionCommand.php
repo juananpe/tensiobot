@@ -160,7 +160,7 @@ class CheckCommand extends UserCommand
 		if (strpos($text, 'wait') !== false) {
 
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
-			$data['reply_markup'] = (new Keyboard(['/Check ❤️', '/Video 📺', '/Chart 📈', '/Appt 📅']))
+			$data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
 				->setResizeKeyboard(true)
 				->setOneTimeKeyboard(true)
 				->setSelective(true);
