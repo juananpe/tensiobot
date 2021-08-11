@@ -157,7 +157,7 @@ class CheckCommand extends UserCommand
                     break;
                 }
 
-		if (strpos($text, 'wait') !== false) {
+		if (strtolower($text) == strtolowe($mensajes['nowait']) ) {
 
 			// $data['reply_markup'] = Keyboard::remove(['oneTime' => true]);
 			$data['reply_markup'] = (new Keyboard([$mensajes['tension'] . ' ❤️', $mensajes['video'].' 📺', $mensajes['historial'] . ' 📈', $mensajes['cita'] . ' 📅']))
