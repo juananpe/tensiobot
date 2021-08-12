@@ -256,7 +256,7 @@ class CheckCommand extends UserCommand
 			$notes['sistolica' . $notes['toma']] = $auxiliar;
 		}
 
-		$data['text'] =  $mensajes['guardadoalta'] . $notes['sistolica'.$notes['toma']]. $mensajes['guardadobaja'] . $notes['diastolica'.$notes['toma']];
+		$data['text'] =  $mensajes['guardadoalta'] . ' ' . $notes['sistolica'.$notes['toma']]. ' ' . $mensajes['guardadobaja'] . ' ' . $notes['diastolica'.$notes['toma']];
 		$result = Request::sendMessage($data);
 
 
