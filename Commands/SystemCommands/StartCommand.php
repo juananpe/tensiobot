@@ -127,8 +127,14 @@ class StartCommand extends SystemCommand
 		}
 	case 1:
 		    if ( !in_array($text, ['es','en','eu'] )){
+			 $opciones = ['es', 'eu', 'en'];
 			 $data['text'] = $mensajes['changelanguage'];
 		         $data['chat_id'] = $chat_id;
+			 $data['reply_markup'] = (new Keyboard($opciones))
+				->setResizeKeyboard(true)
+				->setOneTimeKeyboard(true)
+				->setSelective(true);
+
 			 $result = Request::sendMessage($data);
 			 break;
 		    }	    
